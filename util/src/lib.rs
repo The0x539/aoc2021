@@ -7,7 +7,7 @@ where
     T: FromStr,
     T::Err: Debug,
 {
-    s.parse().unwrap()
+    s.trim().parse().unwrap()
 }
 
 pub fn parse_input<P: AsRef<Path>, T, F: FnMut(&str) -> T>(input_path: P, mut f: F) -> Vec<T> {
@@ -38,13 +38,21 @@ where
     Out::Err: Debug,
 {
     let input = parse_input("test.txt", parser);
-    let output_data = std::fs::read_to_string("test.out.txt").unwrap();
-    let (a, b) = output_data.split_once("\n").unwrap();
-    let [x, y] = [a, b].map(|v| v.trim().parse::<Out>().unwrap());
-    dbg!(&x, &y);
+    let (x, y) = parse_output::<Out>();
 
     assert_eq!(part1(&input), x);
     assert_eq!(part2(&input), y);
+}
+
+pub fn parse_output<T>() -> (T, T)
+where
+    T: FromStr,
+    T::Err: Debug,
+{
+    let output_data = std::fs::read_to_string("test.out.txt").unwrap();
+    let (a, b) = output_data.split_once("\n").unwrap();
+    let [x, y] = [a, b].map(parse_unwrap::<T>);
+    (x, y)
 }
 
 #[macro_export]
