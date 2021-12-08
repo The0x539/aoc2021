@@ -116,19 +116,16 @@ impl Mapping {
 #[cfg(test)]
 #[test]
 fn mini_test() {
-    let pats = [
-        "acedgfb", "cdfbe", "gcdfa", "fbcad", "dab", "cefabd", "cdfgeb", "eafb", "cagedb", "ab",
-    ]
-    .map(util::parse_unwrap::<SignalPattern>);
+    let input_str =
+        "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf";
 
-    let ms = Mapping::determine(&pats).collect_vec();
+    let input = input_str.parse::<Input>().unwrap();
 
+    let ms = Mapping::determine(&input.0).collect_vec();
     assert_eq!(ms, vec![Mapping([2, 5, 6, 0, 1, 3, 4])]);
 
-    let digs = ["cdfeb", "fcadb", "cdfeb", "cdbaf"].map(util::parse_unwrap::<SignalPattern>);
-
     let m = ms[0];
-    assert_eq!(m.output(&digs), 5353);
+    assert_eq!(m.output(&input.1), 5353);
 }
 
 type Output = u32;
