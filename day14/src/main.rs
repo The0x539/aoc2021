@@ -24,36 +24,6 @@ fn parse(s: &str) -> Input {
     Input { template, rules }
 }
 
-#[allow(dead_code)]
-fn apply(state: Vec<u8>, rules: &Rules) -> Vec<u8> {
-    let mut new_state = vec![];
-    for i in 0..state.len() - 1 {
-        new_state.push(state[i]);
-        if let Some(insertion) = rules.get(&(state[i], state[i + 1])) {
-            new_state.push(*insertion);
-        } else {
-            println!("didn't insert");
-        }
-    }
-    new_state.push(*state.last().unwrap());
-    new_state
-}
-
-#[allow(dead_code)]
-fn part1_old(inp: &Input) -> Output {
-    let mut state = inp.template.clone();
-    for _ in 0..10 {
-        state = apply(state, &inp.rules);
-    }
-    let mut frequencies = HashMap::<u8, u64>::new();
-    for elem in state {
-        *frequencies.entry(elem).or_default() += 1;
-    }
-    let min = frequencies.values().copied().min().unwrap();
-    let max = frequencies.values().copied().max().unwrap();
-    max - min
-}
-
 #[derive(Default)]
 struct State {
     pair_counts: HashMap<(u8, u8), u64>,
@@ -65,27 +35,28 @@ impl State {
         let mut state = Self::default();
         for &[a, b] in template.array_windows() {
             state.insert_pair(a, b, 1);
-            state.insert_char(a, 1);
-            state.insert_char(b, 1);
+        }
+        for &c in template {
+            state.insert_char(c, 1);
         }
         state
     }
 
-    fn apply(&self, rules: &Rules) -> Self {
-        let mut new_state = Self::default();
-        new_state.char_counts = self.char_counts.clone();
-        for (&(a, b), &n) in &self.pair_counts {
+    fn apply(&mut self, rules: &Rules) {
+        for ((a, b), n) in self.pair_counts.clone() {
             if let Some(&c) = rules.get(&(a, b)) {
-                new_state.insert_pair(a, c, n);
-                new_state.insert_pair(c, b, n);
-                new_state.insert_char(c, n);
+                self.remove_pair(a, b, n);
+                self.insert_pair(a, c, n);
+                self.insert_pair(c, b, n);
+                self.insert_char(c, n);
             } else {
-                println!("no insertion");
-                new_state.insert_pair(a, b, n);
+                println!("no insertion"); // this never happens
             }
         }
+    }
 
-        new_state
+    fn remove_pair(&mut self, a: u8, b: u8, n: u64) {
+        *self.pair_counts.get_mut(&(a, b)).unwrap() -= n;
     }
 
     fn insert_pair(&mut self, a: u8, b: u8, n: u64) {
@@ -99,14 +70,14 @@ impl State {
     fn result(&self) -> u64 {
         let max = self.char_counts.values().max().unwrap();
         let min = self.char_counts.values().min().unwrap();
-        (max - min) + 2 // ??????????
+        max - min
     }
 }
 
 fn run(inp: &Input, steps: u8) -> Output {
     let mut state = State::new(&inp.template);
     for _ in 0..steps {
-        state = state.apply(&inp.rules);
+        state.apply(&inp.rules);
     }
     state.result()
 }
