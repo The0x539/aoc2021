@@ -23,26 +23,28 @@ fn dijkstra(costs: Vec<Vec<u8>>) -> Output {
     let mut distances = vec![vec![u64::MAX; w]; h];
     distances[0][0] = 0;
 
-    let mut unvisited = HashSet::<(usize, usize)>::new();
-    for x in 0..w {
-        for y in 0..h {
-            unvisited.insert((x, y));
-        }
-    }
-    unvisited.remove(&(0, 0));
+    let mut visited = HashSet::<(usize, usize)>::new();
+    visited.insert((0, 0));
+
+    let mut to_visit = HashSet::new();
 
     let (mut x, mut y) = (0, 0);
 
     loop {
         for (nx, ny) in neighbors(x, y, w, h) {
-            if !unvisited.contains(&(nx, ny)) {
+            if visited.contains(&(nx, ny)) {
                 continue;
             }
-            distances[ny][nx] = distances[ny][nx].min(distances[y][x] + costs[ny][nx] as u64);
+            let potential = distances[y][x] + costs[ny][nx] as u64;
+            if potential < distances[ny][nx] {
+                distances[ny][nx] = potential;
+                to_visit.insert((nx, ny));
+            }
         }
-        unvisited.remove(&(x, y));
+        to_visit.remove(&(x, y));
+        visited.insert((x, y));
 
-        let (cx, cy) = unvisited
+        let (cx, cy) = to_visit
             .iter()
             .copied()
             .min_by_key(|&(x, y)| distances[y][x])
