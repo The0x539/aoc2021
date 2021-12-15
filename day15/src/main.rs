@@ -7,15 +7,6 @@ fn parse(s: &str) -> Input {
     s.bytes().map(|c| c - b'0').collect()
 }
 
-fn neighbors(x: usize, y: usize, w: usize, h: usize) -> impl Iterator<Item = (usize, usize)> {
-    let (x, y) = (x as isize, y as isize);
-    [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
-        .into_iter()
-        .filter(|&(x, y)| x >= 0 && y >= 0)
-        .map(|(x, y)| (x as usize, y as usize))
-        .filter(move |&(x, y)| x < w && y < h)
-}
-
 fn dijkstra(costs: Vec<Vec<u8>>) -> Output {
     let h = costs.len();
     let w = costs[0].len();
@@ -31,7 +22,7 @@ fn dijkstra(costs: Vec<Vec<u8>>) -> Output {
     let (mut x, mut y) = (0, 0);
 
     loop {
-        for (nx, ny) in neighbors(x, y, w, h) {
+        for (nx, ny) in util::quad_neighbors(x, y, w, h) {
             if visited.contains(&(nx, ny)) {
                 continue;
             }
@@ -82,7 +73,6 @@ fn part2(inp: &[Input]) -> Output {
         }
     }
 
-    // Look, brute force got #957. I don't make the rules.
     dijkstra(costs)
 }
 

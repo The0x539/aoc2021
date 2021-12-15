@@ -69,3 +69,40 @@ macro_rules! register {
         }
     };
 }
+
+pub fn quad_neighbors(
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+) -> impl Iterator<Item = (usize, usize)> {
+    let (x, y) = (x as isize, y as isize);
+    [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+        .into_iter()
+        .filter(|&(x, y)| x >= 0 && y >= 0)
+        .map(|(x, y)| (x as usize, y as usize))
+        .filter(move |&(x, y)| x < w && y < h)
+}
+
+pub fn oct_neighbors(
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+) -> impl Iterator<Item = (usize, usize)> {
+    let (x, y) = (x as isize, y as isize);
+    [
+        (x - 1, y),
+        (x + 1, y),
+        (x, y - 1),
+        (x, y + 1),
+        (x - 1, y - 1),
+        (x - 1, y + 1),
+        (x + 1, y - 1),
+        (x + 1, y + 1),
+    ]
+    .into_iter()
+    .filter(|&(x, y)| x >= 0 && y >= 0)
+    .map(|(x, y)| (x as usize, y as usize))
+    .filter(move |&(x, y)| x < w && y < h)
+}
