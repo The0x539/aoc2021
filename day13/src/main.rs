@@ -59,7 +59,7 @@ impl Grid {
 
 fn part1(inp: &Input) -> Output {
     let grid = Grid::from_input(inp);
-    let &(axis, coord) = dbg!(&inp.folds[0]);
+    let &(axis, coord) = &inp.folds[0];
     let new_grid = grid.fold(axis, coord);
 
     new_grid.0.len()
