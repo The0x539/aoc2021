@@ -59,8 +59,7 @@ impl BoardState {
     }
 }
 
-fn parse_input(path: &str) -> Option<(Vec<u8>, Vec<Board>)> {
-    let data = std::fs::read_to_string(path).ok()?;
+fn parse_input(data: &str) -> Option<(Vec<u8>, Vec<Board>)> {
     let calls = data
         .lines()
         .next()?
@@ -85,9 +84,10 @@ fn parse_input(path: &str) -> Option<(Vec<u8>, Vec<Board>)> {
     Some((calls, boards))
 }
 
-fn part1((calls, mut boards): (Vec<u8>, Vec<Board>)) -> u32 {
+fn part1((calls, boards): &(Vec<u8>, Vec<Board>)) -> u32 {
+    let mut boards = boards.clone();
     let mut states = vec![BoardState::default(); boards.len()];
-    for call in calls {
+    for &call in calls {
         for (state, board) in states.iter_mut().zip(&mut boards) {
             state.mark(board, call);
             if state.has_won() {
@@ -98,9 +98,10 @@ fn part1((calls, mut boards): (Vec<u8>, Vec<Board>)) -> u32 {
     panic!("no winner");
 }
 
-fn part2((calls, mut boards): (Vec<u8>, Vec<Board>)) -> u32 {
+fn part2((calls, boards): &(Vec<u8>, Vec<Board>)) -> u32 {
+    let mut boards = boards.clone();
     let mut states = vec![BoardState::default(); boards.len()];
-    for call in calls {
+    for &call in calls {
         for (state, board) in states.iter_mut().zip(&mut boards) {
             state.mark(board, call);
         }
@@ -117,18 +118,4 @@ fn part2((calls, mut boards): (Vec<u8>, Vec<Board>)) -> u32 {
     panic!("no last-place");
 }
 
-fn main() {
-    let input = parse_input("input.txt").unwrap();
-    println!("{}", part1(input.clone()));
-    println!("{}", part2(input));
-}
-
-#[cfg(test)]
-#[test]
-fn test() {
-    let input = parse_input("test.txt").unwrap();
-    let (x, y) = util::parse_output();
-
-    assert_eq!(part1(input.clone()), x);
-    assert_eq!(part2(input), y);
-}
+util::register_alt!(|s| parse_input(s).unwrap(), part1, part2);

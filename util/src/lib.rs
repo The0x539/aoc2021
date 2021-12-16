@@ -29,6 +29,18 @@ where
     println!("{}\n{}", part1(&input), part2(&input));
 }
 
+pub fn run_alt<Parser, Part1, Part2, In, Out>(parser: Parser, part1: Part1, part2: Part2)
+where
+    Parser: FnOnce(&str) -> In,
+    Part1: FnOnce(&In) -> Out,
+    Part2: FnOnce(&In) -> Out,
+    Out: Display,
+{
+    let input_data = std::fs::read_to_string("input.txt").unwrap();
+    let input = parser(&input_data);
+    println!("{}\n{}", part1(&input), part2(&input));
+}
+
 pub fn test<Parser, Part1, Part2, In, Out>(parser: Parser, part1: Part1, part2: Part2)
 where
     Parser: FnMut(&str) -> In,
@@ -38,6 +50,22 @@ where
     Out::Err: Debug,
 {
     let input = parse_input("test.txt", parser);
+    let (x, y) = parse_output::<Out>();
+
+    assert_eq!(part1(&input), x);
+    assert_eq!(part2(&input), y);
+}
+
+pub fn test_alt<Parser, Part1, Part2, In, Out>(parser: Parser, part1: Part1, part2: Part2)
+where
+    Parser: FnOnce(&str) -> In,
+    Part1: FnOnce(&In) -> Out,
+    Part2: FnOnce(&In) -> Out,
+    Out: Debug + FromStr + PartialEq,
+    Out::Err: Debug,
+{
+    let input_data = std::fs::read_to_string("test.txt").unwrap();
+    let input = parser(&input_data);
     let (x, y) = parse_output::<Out>();
 
     assert_eq!(part1(&input), x);
@@ -66,6 +94,21 @@ macro_rules! register {
         #[test]
         fn test() {
             $crate::test($parser, $part1, $part2);
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! register_alt {
+    ($parser:expr, $part1:expr, $part2:expr) => {
+        fn main() {
+            $crate::run_alt($parser, $part1, $part2);
+        }
+
+        #[cfg(test)]
+        #[test]
+        fn test() {
+            $crate::test_alt($parser, $part1, $part2);
         }
     };
 }

@@ -85,19 +85,4 @@ fn part2(inp: &Input) -> Output {
     0
 }
 
-fn main() {
-    let input = std::fs::read_to_string("input.txt").unwrap();
-    let input = parse(&input);
-    println!("{}", part1(&input));
-    println!("{}", part2(&input));
-}
-
-#[cfg(test)]
-#[test]
-fn test() {
-    let (a, b) = util::parse_output::<usize>();
-    let input = std::fs::read_to_string("test.txt").unwrap();
-    let input = parse(&input);
-    assert_eq!(a, part1(&input));
-    assert_eq!(b, part2(&input));
-}
+util::register_alt!(parse, part1, part2);
