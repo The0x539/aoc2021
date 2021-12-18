@@ -9,29 +9,13 @@ struct State {
     vals: Vec<Val>,
 }
 
-enum Tree {
-    Leaf(u8),
-    Parent(Box<Self>, Box<Self>),
-}
-
-impl Tree {
-    fn parse(vals: &mut &[Val], depth: u8) -> Self {
-        if vals[0].depth >= depth {
-            let l = Self::parse(vals, depth + 1);
-            let r = Self::parse(vals, depth + 1);
-            Self::Parent(Box::new(l), Box::new(r))
-        } else {
-            let v = vals[0].value;
-            *vals = &vals[1..];
-            Self::Leaf(v)
-        }
-    }
-
-    fn magnitude(&self) -> Output {
-        match self {
-            Self::Leaf(v) => *v as _,
-            Self::Parent(l, r) => 3 * l.magnitude() + 2 * r.magnitude(),
-        }
+fn magnitude_rec(vals: &mut &[Val], depth: u8) -> Output {
+    if vals[0].depth >= depth {
+        3 * magnitude_rec(vals, depth + 1) + 2 * magnitude_rec(vals, depth + 1)
+    } else {
+        let v = vals[0].value;
+        *vals = &vals[1..];
+        v as Output
     }
 }
 
@@ -121,13 +105,8 @@ impl State {
         }
     }
 
-    fn to_tree(&self) -> Tree {
-        let mut vals = &self.vals[..];
-        Tree::parse(&mut vals, 0)
-    }
-
     fn magnitude(&self) -> Output {
-        self.to_tree().magnitude()
+        magnitude_rec(&mut &self.vals[..], 0)
     }
 }
 
