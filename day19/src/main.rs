@@ -212,12 +212,13 @@ impl Scanner {
         Rotation::all().map(|r| self.rotated(&r))
     }
 
-    fn overlaps(&self, other: &Self) -> bool {
+    fn overlaps(&self, other: &Self, offset: Vec3) -> bool {
         let mut hit_count = 0;
         let mut remaining = self.beacons.len();
 
         for b in &self.beacons {
-            if other.beacons.contains(b) {
+            let b = *b + offset;
+            if other.beacons.contains(&b) {
                 hit_count += 1;
                 if hit_count >= 12 {
                     return true;
@@ -263,8 +264,8 @@ fn unify(inp: &Input) -> (Vec<Scanner>, Vec<Vec3>) {
                 for test_beacon in &test_scanner.beacons {
                     for comparison_beacon in &rotated.beacons {
                         let delta = test_beacon.pos() - comparison_beacon.pos();
-                        let translated = rotated.clone() + delta;
-                        if test_scanner.overlaps(&translated) {
+                        if rotated.overlaps(test_scanner, delta) {
+                            let translated = rotated.clone() + delta;
                             matching_scanner = Some((translated, delta));
                             break 'found;
                         }
