@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 type Input = Vec<i32>;
 type Output = i32;
 

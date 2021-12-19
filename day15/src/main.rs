@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 use std::collections::HashSet;
 
 type Input = Vec<u8>;

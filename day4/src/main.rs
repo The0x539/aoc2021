@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 use std::fmt::{Display, Formatter};
 
 #[derive(Default, Debug, Copy, Clone)]

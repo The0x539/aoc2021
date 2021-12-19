@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 use itertools::Itertools;
 use std::str::FromStr;
 

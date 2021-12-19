@@ -1,3 +1,4 @@
+#![cfg_attr(test, feature(test))]
 #![feature(array_windows)]
 
 fn part1(input: &[u16]) -> usize {

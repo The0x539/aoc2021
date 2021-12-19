@@ -1,3 +1,7 @@
+#![feature(test)]
+
+extern crate test;
+
 use std::fmt::{Debug, Display};
 use std::path::Path;
 use std::str::FromStr;
@@ -83,6 +87,60 @@ where
     (x, y)
 }
 
+pub fn bench_parse<Parser, In>(mut parser: Parser, b: &mut test::Bencher)
+where
+    Parser: FnMut(&str) -> In,
+{
+    let input_data = std::fs::read_to_string("input.txt").unwrap();
+    let input_data = input_data.as_str();
+    b.iter(|| {
+        let input_data = test::black_box(input_data);
+        for line in input_data.lines().map(str::trim) {
+            test::black_box(parser(line));
+        }
+    })
+}
+
+pub fn bench_parse_alt<Parser, In>(mut parser: Parser, b: &mut test::Bencher)
+where
+    Parser: FnMut(&str) -> In,
+{
+    let input_data = std::fs::read_to_string("input.txt").unwrap();
+    let input_data = input_data.as_str();
+    b.iter(|| {
+        let input_data = test::black_box(input_data);
+        test::black_box(parser(input_data));
+    })
+}
+
+pub fn bench_solution<Parser, F, In, Out>(parser: Parser, mut solution: F, b: &mut test::Bencher)
+where
+    Parser: FnMut(&str) -> In,
+    F: FnMut(&[In]) -> Out,
+{
+    let input = parse_input("input.txt", parser);
+    b.iter(|| {
+        let input = test::black_box(&input);
+        test::black_box(solution(input));
+    })
+}
+
+pub fn bench_solution_alt<Parser, F, In, Out>(
+    parser: Parser,
+    mut solution: F,
+    b: &mut test::Bencher,
+) where
+    Parser: FnOnce(&str) -> In,
+    F: FnMut(&In) -> Out,
+{
+    let input_data = std::fs::read_to_string("input.txt").unwrap();
+    let input = parser(&input_data);
+    b.iter(|| {
+        let input = test::black_box(&input);
+        test::black_box(solution(input));
+    })
+}
+
 #[macro_export]
 macro_rules! register {
     ($parser:expr, $part1:expr, $part2:expr) => {
@@ -91,9 +149,30 @@ macro_rules! register {
         }
 
         #[cfg(test)]
+        extern crate test;
+
+        #[cfg(test)]
         #[test]
         fn test() {
             $crate::test($parser, $part1, $part2);
+        }
+
+        #[cfg(all(test, not(debug_assertions)))]
+        #[bench]
+        fn bench_parse(b: &mut test::Bencher) {
+            $crate::bench_parse($parser, b)
+        }
+
+        #[cfg(all(test, not(debug_assertions)))]
+        #[bench]
+        fn bench_part1(b: &mut test::Bencher) {
+            $crate::bench_solution($parser, $part1, b)
+        }
+
+        #[cfg(all(test, not(debug_assertions)))]
+        #[bench]
+        fn bench_part2(b: &mut test::Bencher) {
+            $crate::bench_solution($parser, $part2, b)
         }
     };
 }
@@ -106,9 +185,30 @@ macro_rules! register_alt {
         }
 
         #[cfg(test)]
+        extern crate test;
+
+        #[cfg(test)]
         #[test]
         fn test() {
             $crate::test_alt($parser, $part1, $part2);
+        }
+
+        #[cfg(all(test, not(debug_assertions)))]
+        #[bench]
+        fn bench_parse(b: &mut test::Bencher) {
+            $crate::bench_parse_alt($parser, b)
+        }
+
+        #[cfg(all(test, not(debug_assertions)))]
+        #[bench]
+        fn bench_part1(b: &mut test::Bencher) {
+            $crate::bench_solution_alt($parser, $part1, b)
+        }
+
+        #[cfg(all(test, not(debug_assertions)))]
+        #[bench]
+        fn bench_part2(b: &mut test::Bencher) {
+            $crate::bench_solution_alt($parser, $part2, b)
         }
     };
 }

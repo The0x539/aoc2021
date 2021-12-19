@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 use std::collections::BTreeSet;
 
 #[derive(Default)]

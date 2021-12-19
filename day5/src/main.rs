@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 use either::{Left, Right};
 use std::str::FromStr;
 

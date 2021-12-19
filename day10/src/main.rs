@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 type Input = Vec<char>;
 type Output = u64;
 use either::*;

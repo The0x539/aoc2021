@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 fn parse_bits(bits: &[bool]) -> u32 {
     let mut n = 0;
     for bit in bits {
@@ -5,6 +7,10 @@ fn parse_bits(bits: &[bool]) -> u32 {
         n |= *bit as u32;
     }
     n
+}
+
+fn parse(s: &str) -> Vec<bool> {
+    s.bytes().map(|b| b == b'1').collect()
 }
 
 fn part1(input: &[Vec<bool>]) -> u32 {
@@ -59,4 +65,4 @@ fn part2(input: &[Vec<bool>]) -> u32 {
     parse_bits(&co2_rating[0]) * parse_bits(&o2_rating[0])
 }
 
-util::register!(|s| s.bytes().map(|b| b == b'1').collect(), part1, part2);
+util::register!(parse, part1, part2);

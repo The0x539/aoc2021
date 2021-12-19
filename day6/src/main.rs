@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 type State = [u64; 9];
 
 fn parse_input(s: &str) -> State {

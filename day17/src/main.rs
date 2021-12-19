@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 #[derive(Debug)]
 struct Input {
     min_x: i32,

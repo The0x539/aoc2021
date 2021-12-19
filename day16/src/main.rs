@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 use std::ops::{BitOr, Shl};
 
 type Input = Vec<bool>;

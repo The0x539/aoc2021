@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 #[derive(Debug, Copy, Clone)]
 struct Val {
     value: u8,

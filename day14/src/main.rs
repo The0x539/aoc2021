@@ -1,3 +1,4 @@
+#![cfg_attr(test, feature(test))]
 #![feature(array_windows)]
 
 use std::collections::HashMap;

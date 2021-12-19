@@ -1,3 +1,5 @@
+#![cfg_attr(test, feature(test))]
+
 use std::collections::HashSet;
 use std::ops::{Add, Sub};
 
