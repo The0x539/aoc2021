@@ -3,6 +3,8 @@
 use std::collections::HashSet;
 use std::ops::{Add, Sub};
 
+use uuid::Uuid;
+
 type Input = Vec<Scanner>;
 type Output = usize;
 
@@ -10,7 +12,7 @@ fn parse(s: &str) -> Input {
     let mut lines = s.lines().map(|l| l.trim()).peekable();
     let mut scanners = vec![];
     while lines.peek().is_some() {
-        let mut scanner = Scanner { beacons: vec![] };
+        let mut scanner = Scanner::new();
         lines.next(); // skip scanner header
         for line in lines.by_ref().take_while(|l| !l.is_empty()) {
             let mut xyz = line.split(",").map(|v| v.parse::<i32>().unwrap());
@@ -189,12 +191,21 @@ impl Rotation {
 #[derive(Debug, Clone)]
 struct Scanner {
     beacons: Vec<Beacon>,
+    id: Uuid,
 }
 
 impl Scanner {
+    fn new() -> Self {
+        Self {
+            beacons: vec![],
+            id: Uuid::new_v4(),
+        }
+    }
+
     fn rotated(&self, rotations: &[Rotation]) -> Self {
         Self {
             beacons: self.beacons.iter().map(|b| b.rotated(rotations)).collect(),
+            id: self.id,
         }
     }
 
@@ -216,6 +227,7 @@ impl Add<Vec3> for Scanner {
     fn add(self, rhs: Vec3) -> Self::Output {
         Self {
             beacons: self.beacons.into_iter().map(|b| b + rhs).collect(),
+            id: self.id,
         }
     }
 }
@@ -225,11 +237,16 @@ fn unify(inp: &Input) -> (Vec<Scanner>, Vec<Vec3>) {
 
     let mut scanners = inp[1..].to_vec();
     let mut offsets = vec![];
+    let mut failures = HashSet::new();
     while !scanners.is_empty() {
         let scanner = scanners.remove(0);
         let mut matching_scanner = None;
 
         'found: for test_scanner in &region {
+            if failures.contains(&(test_scanner.id, scanner.id)) {
+                continue;
+            }
+
             for rotated in scanner.all_rotations() {
                 for test_beacon in &test_scanner.beacons {
                     for comparison_beacon in &rotated.beacons {
@@ -242,6 +259,8 @@ fn unify(inp: &Input) -> (Vec<Scanner>, Vec<Vec3>) {
                     }
                 }
             }
+
+            failures.insert((test_scanner.id, scanner.id));
         }
 
         if let Some((s, delta)) = matching_scanner {
