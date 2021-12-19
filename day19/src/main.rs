@@ -108,12 +108,11 @@ impl Beacon {
 
 impl Add<Vec3> for Beacon {
     type Output = Self;
-    fn add(self, rhs: Vec3) -> Self::Output {
-        Self {
-            x: self.x + rhs.0,
-            y: self.y + rhs.1,
-            z: self.z + rhs.2,
-        }
+    fn add(mut self, rhs: Vec3) -> Self::Output {
+        self.x += rhs.0;
+        self.y += rhs.1;
+        self.z += rhs.2;
+        self
     }
 }
 
@@ -224,11 +223,11 @@ impl Scanner {
 
 impl Add<Vec3> for Scanner {
     type Output = Self;
-    fn add(self, rhs: Vec3) -> Self::Output {
-        Self {
-            beacons: self.beacons.into_iter().map(|b| b + rhs).collect(),
-            id: self.id,
+    fn add(mut self, rhs: Vec3) -> Self::Output {
+        for beacon in &mut self.beacons {
+            *beacon = *beacon + rhs;
         }
+        self
     }
 }
 
