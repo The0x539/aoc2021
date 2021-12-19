@@ -213,11 +213,23 @@ impl Scanner {
     }
 
     fn overlaps(&self, other: &Self) -> bool {
-        self.beacons
-            .iter()
-            .filter(|b| other.beacons.contains(b))
-            .count()
-            >= 12
+        let mut hit_count = 0;
+        let mut remaining = self.beacons.len();
+
+        for b in &self.beacons {
+            if other.beacons.contains(b) {
+                hit_count += 1;
+                if hit_count >= 12 {
+                    return true;
+                }
+            }
+
+            remaining -= 1;
+            if hit_count + remaining < 12 {
+                return false;
+            }
+        }
+        false
     }
 }
 
@@ -237,6 +249,7 @@ fn unify(inp: &Input) -> (Vec<Scanner>, Vec<Vec3>) {
     let mut scanners = inp[1..].to_vec();
     let mut offsets = vec![];
     let mut failures = HashSet::new();
+
     while !scanners.is_empty() {
         let scanner = scanners.remove(0);
         let mut matching_scanner = None;
