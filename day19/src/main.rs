@@ -218,45 +218,7 @@ impl Add<Vec3> for Scanner {
     }
 }
 
-fn part1(inp: &Input) -> Output {
-    let mut region = vec![inp[0].clone()];
-
-    let mut scanners = inp[1..].to_vec();
-    while !scanners.is_empty() {
-        let scanner = scanners.remove(0);
-        let mut matching_scanner = None;
-
-        'found: for test_scanner in &region {
-            for rotated in scanner.all_rotations() {
-                for test_beacon in &test_scanner.beacons {
-                    for comparison_beacon in &rotated.beacons {
-                        let delta = test_beacon.pos() - comparison_beacon.pos();
-                        let translated = rotated.clone() + delta;
-                        if test_scanner.overlaps(&translated) {
-                            matching_scanner = Some(translated);
-                            break 'found;
-                        }
-                    }
-                }
-            }
-        }
-
-        if let Some(s) = matching_scanner {
-            region.push(s);
-        } else {
-            // better luck next time
-            scanners.push(scanner);
-        }
-    }
-
-    region
-        .into_iter()
-        .flat_map(|s| s.beacons)
-        .collect::<HashSet<Beacon>>()
-        .len()
-}
-
-fn part2(inp: &Input) -> Output {
+fn unify(inp: &Input) -> (Vec<Scanner>, Vec<Vec3>) {
     let mut region = vec![inp[0].clone()];
 
     let mut scanners = inp[1..].to_vec();
@@ -288,6 +250,22 @@ fn part2(inp: &Input) -> Output {
             scanners.push(scanner);
         }
     }
+
+    (region, offsets)
+}
+
+fn part1(inp: &Input) -> Output {
+    let (region, _) = unify(inp);
+
+    region
+        .into_iter()
+        .flat_map(|s| s.beacons)
+        .collect::<HashSet<Beacon>>()
+        .len()
+}
+
+fn part2(inp: &Input) -> Output {
+    let (_, offsets) = unify(inp);
 
     let mut max_dist = 0;
     for a in &offsets {
