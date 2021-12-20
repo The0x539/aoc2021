@@ -88,11 +88,11 @@ impl Image {
 
     fn enhance(&self, algorithm: &Algorithm) -> Self {
         let mut new = Image {
-            top: self.top - 2,
-            left: self.left - 2,
-            bottom: self.bottom + 2,
-            right: self.right + 2,
-            border: false,
+            top: self.top - 1,
+            left: self.left - 1,
+            bottom: self.bottom + 1,
+            right: self.right + 1,
+            border: algorithm.0[0] ^ self.border,
             pixels: HashSet::new(),
         };
 
@@ -118,12 +118,6 @@ impl Image {
                 }
             }
         }
-
-        new.border = new.pixels.contains(&(new.top, new.left));
-        new.top += 1;
-        new.left += 1;
-        new.bottom -= 1;
-        new.right -= 1;
 
         new
     }
